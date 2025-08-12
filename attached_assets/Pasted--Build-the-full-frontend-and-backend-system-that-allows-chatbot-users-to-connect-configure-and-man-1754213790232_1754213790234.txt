@@ -1,0 +1,167 @@
+“Build the full frontend and backend system that allows chatbot users to connect, configure, and manage multiple external tools (e.g., Gmail, Google Sheets, Zapier, Shopify, etc.). The system must support multiple nodes per tool (like n8n), where each node performs a different action, with credentials reused. Follow the details below.”
+
+🔐 Features Overview:
+✅ Tool Categories:
+
+Google Tools: Gmail, Sheets, Docs, Drive, Calendar, Meet, Forms, Slides
+
+Automation: Zapier, n8n, Make
+
+E-commerce: Shopify
+
+CRM: Zoho, HubSpot, Salesforce
+
+Docs & Notes: Notion
+
+Webhooks / APIs (Custom REST calls)
+
+🧩 Integration UI Features:
+✅ Step 1: Connect Tool
+
+On the chatbot builder, user sees all available tools in a grid/list
+
+Each tool has:
+
+Connect button → triggers popup/modal
+
+Modal asks for required credentials:
+
+API Key / OAuth / Client ID + Secret (based on tool)
+
+On success:
+
+Connection is tested
+
+Connect button is replaced with Configure
+
+✅ Step 2: Configure Nodes (Per Tool)
+
+Clicking Configure opens modal with node management
+
+Users can:
+
+See existing connected nodes
+
+Add New Node
+
+Node Name (user-defined)
+
+Operation Type (based on tool):
+
+Gmail: Send Email, Read Inbox
+
+Sheets: Read Data, Write Data, Append Row
+
+Shopify: Fetch Orders, Fetch Products, Track Order
+
+Zapier/n8n: Trigger Zap, Start Workflow
+
+Tool-specific config fields:
+
+Sheet ID + Range
+
+Email fields (to, subject, body)
+
+Folder/file ID for Drive
+
+Optional Test Button to test config
+
+✅ Step 3: Save + Use in Prompt
+
+Saved tool nodes should be:
+
+Displayed in “Connected Tools” section
+
+Available for dragging into the System Prompt editor
+
+e.g., “Use Google Sheets - Append Lead node to store lead info.”
+
+✅ Design Notes:
+
+Each tool config screen uses vertical tab or card system
+
+Multi-node per tool with Add Node button
+
+Show connection status (Connected ✅ or Error ❌)
+
+Allow Disconnect Tool or Delete Node
+
+💾 Backend / Data Handling (Design Specification)
+✅ Credentials Storage:
+
+Store securely (encrypted)
+
+Indexed by userId + toolName
+
+✅ Node Configuration DB Schema:
+
+json
+Copy
+Edit
+{
+  "userId": "123",
+  "tool": "Google Sheets",
+  "credentialsId": "xyz123",
+  "nodes": [
+    {
+      "nodeName": "Read Leads",
+      "operation": "read",
+      "config": {
+        "sheetId": "abc123",
+        "range": "Sheet1!A1:C10"
+      }
+    },
+    {
+      "nodeName": "Add Customer",
+      "operation": "write",
+      "config": {
+        "sheetId": "abc123",
+        "range": "Sheet1!A11"
+      }
+    }
+  ]
+}
+✅ Tool Usage Logic:
+
+When a user query is processed:
+
+AI checks the prompt for node mentions (e.g., @AppendRow)
+
+Server reads the node config and executes that tool’s action using API
+
+Response is returned and injected into AI response
+
+🔑 Credentials Required Per Tool:
+Tool	Required for Connection
+Gmail	OAuth2 (Client ID, Client Secret)
+Google Sheets	OAuth2 / API Key
+Google Drive	OAuth2
+Shopify	Store URL + Admin API Token
+Zapier	Webhook URL
+n8n	Webhook URL + optional Auth
+Make	Scenario Webhook URL
+Zoho	Client ID + Secret + Auth Code
+Notion	Integration Token + Workspace ID
+HubSpot	API Key
+Salesforce	OAuth + API Token
+
+📎 Tool Integration Flow:
+User clicks Connect
+
+Modal asks for credentials (with tool-specific guidance)
+
+After saving → system calls /test-connection
+
+On success → shows Configure with list of existing nodes
+
+On Configure:
+
+User adds multiple action nodes
+
+Each node saved with nodeId, operation, config
+
+Nodes can be used inside chatbot logic or system prompt
+
+🧠 AI Usage (System Prompt Example):
+"If user asks to add contact, use the Google Sheets - Add Contact node.
+If user asks for product status, use Shopify - Track Order node."
