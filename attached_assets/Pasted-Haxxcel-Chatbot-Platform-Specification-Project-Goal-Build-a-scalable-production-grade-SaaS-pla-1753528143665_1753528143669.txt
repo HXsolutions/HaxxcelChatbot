@@ -1,0 +1,448 @@
+Haxxcel Chatbot Platform Specification
+🎯 Project Goal
+Build a scalable, production-grade SaaS platform named Haxxcel Chatbot (similar to Chatbase.co) enabling businesses to create customizable, AI-powered chatbots with Retrieval-Augmented Generation (RAG) support. The platform must support all available large language models (LLMs) and voice models, including Google Gemini, Grok, LLaMA, Mistral, Qwen, and others, with user-configurable API keys, connection testing, and model selection. Google is the default provider for all models, including voice models. The system includes multi-channel deployment (websites, Shopify, WhatsApp, etc.), third-party tool integrations, file/image/voice input support, real-time analytics, webhooks, and white-label plans. When embedded on a website, the chatbot must display a footer in the chat window with a clickable "Powered by Haxxcel Solutions" button redirecting to https://haxxcelsolutions.com. The platform will be built using Firebase Studio for seamless frontend and backend development, with a user dashboard and master admin panel for management.
+
+✅ Core System Requirements
+1. User SaaS Dashboard
+Purpose: Provide a user-friendly interface for managing accounts, subscriptions, and chatbots.
+
+Authentication:
+
+Sign-up, login, logout, and password reset (email-based or OAuth via Google, Microsoft).
+Multi-factor authentication (MFA) support using TOTP (e.g., Google Authenticator).
+Role-based access: Standard User, Admin.
+
+
+Subscription Management:
+
+Plans: Starter (1 chatbot, limited integrations), Pro (5 chatbots, advanced integrations), Enterprise (unlimited chatbots, custom integrations, white-label option).
+View, upgrade, downgrade, or cancel subscriptions.
+Payment integration with Stripe or Paddle (recurring billing, invoice history).
+Usage-based limits (API calls, tool integrations, storage) based on plan.
+
+
+Chatbot Management:
+
+Create, edit, delete, and duplicate chatbots (limits based on plan).
+View chatbot analytics (real-time conversation volume, user engagement, response times).
+Export chat history (last 7 days) in CSV/JSON formats.
+View connected tools, APIs, and selected LLM/voice models per chatbot.
+
+
+Account Settings:
+
+Update user profile (name, email, company).
+Manage API keys for external LLM and voice model providers.
+
+
+
+2. AI Chatbot Builder
+Purpose: Enable users to create and customize AI chatbots with flexible data sources and configurations.
+
+Data Input Sources:
+
+File uploads: .pdf, .docx, .txt (max 50MB per file, parsed using libraries like PyPDF2 or python-docx).
+URL input: Crawl websites for text content (limit to 10 URLs per chatbot, max depth 3).
+Plain text input: Up to 10,000 characters per input.
+Image input: Process images for prompts (e.g., OCR via Google Vision API).
+Voice input: Convert audio to text via Google Cloud Speech-to-Text (default), Whisper, Deepgram, or platform-provided API.
+
+
+Customization Options:
+
+Chatbot identity: Name, avatar/logo (upload or select defaults), color scheme (CSS-based).
+System prompt: Customizable instructions (e.g., "Act as a formal customer support agent" or "Be a friendly restaurant guide").
+Pre-trained responses: Upload images (e.g., menus, catalogs) for chatbot to return during conversations.
+
+
+RAG Support:
+
+Store uploaded documents/images in a vector database for RAG.
+Generate embeddings using models like sentence-transformers or Google Gemini embeddings.
+Retrieve relevant context during conversations for accurate responses.
+
+
+
+3. LLM Model Selection (Bring Your Own Key - BYOK)
+Purpose: Allow users to select and configure any available LLM, with Google as the default provider.
+
+Supported Models:
+
+Default Provider - Google:
+Gemini 2.0 Flash, Gemini 2.5 Pro, Gemma 3 (1B, 4B, 12B, 27B), and any future Google models (via Google AI API).
+
+
+Other Providers:
+OpenAI: GPT-3.5, GPT-4, GPT-4o, o3-mini.
+Anthropic: Claude 1, Claude 2, Claude 3, Claude 3.7, Claude Sonnet 4.
+xAI: Grok, Grok 3, Grok 4.
+Meta: LLaMA 3, LLaMA 3.1, LLaMA 3.2, LLaMA 4 (70B, 405B variants).
+Mistral AI: Mistral Large Instruct 2407, Codestral 22B, Mistral Small 3.1.
+Alibaba: Qwen 2.5, Qwen 3 (4B, 32B, 235B), Qwen 2.5 Coder 32B.
+DeepSeek: DeepSeek R1, DeepSeek R1 Distill LLaMA 70B.
+Other Models: Support any model available via Hugging Face (e.g., Zephyr 7B, SauerkrautLM) or Together AI (e.g., RedPajama-INCITE-7B).
+
+
+Future Support: Automatically detect and integrate new models from supported providers via their APIs.
+
+
+Configuration:
+
+Users select a provider (default: Google) from a dropdown in the dashboard.
+Users input their own API key for the selected provider (e.g., Google AI API key, OpenAI API key).
+Platform-provided API keys (Google AI API by default, rate-limited based on plan).
+Test connection button: Validates API key by making a test API call to the provider (e.g., list available models or small text generation task).
+Display all models available from the selected provider (e.g., for Google: Gemini 2.0 Flash, Gemini 2.5 Pro, Gemma 3 variants).
+Fallback to Google Gemini 2.5 Pro if no API key is provided or connection fails.
+
+
+Management:
+
+Show model details (e.g., context window, multimodal capabilities, parameter count) in the dashboard.
+Track usage stats (API calls, tokens consumed) per chatbot and model.
+Alert users if API key is invalid or quota is exceeded.
+
+
+
+4. Tool Integrations (Drag & Connect)
+Purpose: Enable chatbots to interact with external tools and services.
+
+Supported Integrations:
+
+Google Suite: Google Sheets, Gmail, Google Calendar, Google Drive (OAuth-based).
+Productivity Tools: Notion (read/write via API).
+CRMs: HubSpot, Zoho, Salesforce (OAuth or API key).
+Automation Platforms: n8n (native), Make.com, Zapier (via webhooks).
+Custom APIs: Webhooks and REST API endpoints.
+Databases: Postgres, MongoDB (read/write via secure connection strings).
+E-commerce: Shopify (fetch products, orders, FAQs via Shopify API).
+
+
+Configuration:
+
+Drag-and-drop interface for connecting tools (UI built in Firebase Studio).
+Plan-based limits: Starter (2 tools), Pro (5 tools), Enterprise (unlimited).
+Store credentials securely (encrypted in Firebase Firestore).
+
+
+
+5. Multi-Channel Deployment
+Purpose: Deploy chatbots across multiple platforms for seamless user interaction.
+
+Channels:
+
+Website: Embed via JavaScript snippet or iframe (customizable widget size/position). The chat window includes a footer with a clickable "Powered by Haxxcel Solutions" button redirecting to https://haxxcelsolutions.com. The button is styled consistently with the chatbot’s theme but remains non-editable and always visible unless white-labeled (Enterprise plan).
+Shopify: Integrate via Shopify App Block or API (fetch store data like products/orders).
+WhatsApp: User-provided Twilio/WhatsApp API or platform-hosted solution.
+Facebook Messenger: Integration via Meta’s API.
+Instagram DM: Integration via Meta’s API.
+Telegram: Optional integration via Telegram Bot API.
+
+
+Deployment Process:
+
+Generate unique embed code/API keys for each channel.
+Provide step-by-step setup guides in the dashboard.
+
+
+
+6. Voice Input Support
+Purpose: Enable voice-based interaction for chatbots, with Google as the default provider.
+
+Implementation:
+
+Toggle voice support per chatbot (on/off).
+Default Voice Model: Google Cloud Speech-to-Text and Google Text-to-Speech (via Google AI API).
+Other Voice Models:
+Whisper (OpenAI).
+Deepgram.
+ElevenLabs for text-to-speech.
+Platform-provided voice API (Google-based, billed by usage).
+
+
+Convert voice to text for LLM processing; generate voice responses using text-to-speech.
+
+
+Configuration:
+
+Users select a voice provider (default: Google) and input their API key.
+Test connection button: Validates voice API key by processing a sample audio file.
+Display all available voice models from the selected provider (e.g., Google’s standard and premium voices).
+Fallback to Google Cloud Speech-to-Text if no API key is provided or connection fails.
+
+
+Billing:
+
+Platform-provided Google voice API billed by usage (e.g., per minute of audio).
+Users can input their own API keys to avoid platform billing.
+
+
+
+7. Image Input + Output
+Purpose: Support image-based prompts and responses for enhanced chatbot functionality.
+
+Input:
+
+Users upload images as prompts (e.g., product photos for support queries).
+Process images using OCR (Google Vision API) or vision APIs (OpenAI Vision).
+
+
+Output:
+
+Chatbots can return pre-uploaded images (e.g., menus, catalogs) based on user queries.
+Store images in cloud storage (Firebase Storage).
+
+
+
+8. Real-Time Analytics Dashboard
+Purpose: Provide users with real-time insights into chatbot performance.
+
+Features:
+
+Display metrics: conversation volume, user engagement (e.g., average session duration), response times, and API usage.
+Visualizations: Line charts for conversation trends, pie charts for channel usage, and bar charts for tool integration activity.
+Filterable by date range (e.g., last 24 hours, 7 days, 30 days).
+Accessible in the user dashboard for each chatbot.
+
+
+Implementation:
+
+Store analytics data in Firebase Firestore (real-time updates).
+Use Firebase Studio to build interactive charts (e.g., Chart.js integration).
+Update metrics in real-time using Firebase Realtime Database triggers.
+
+
+
+9. Webhooks for External Systems
+Purpose: Allow chatbots to integrate with external systems via webhooks.
+
+Features:
+
+Users can configure webhook URLs in the dashboard for each chatbot.
+Trigger webhooks on events (e.g., new conversation started, specific user query).
+Support HTTP methods: POST, GET, PUT.
+Include payload customization (e.g., JSON with conversation data, user input).
+
+
+Implementation:
+
+Store webhook configurations in Firebase Firestore.
+Trigger webhooks via Firebase Functions on specified events.
+Provide error logs for failed webhook calls in the dashboard.
+
+
+
+10. White-Label Plans
+Purpose: Enable resellers and agencies to offer the platform under their own branding.
+
+Features:
+
+Available in Enterprise plan only.
+Custom branding: Replace platform logo, colors, and domain with reseller’s branding.
+White-label dashboard: Users see reseller’s branding instead of Haxxcel Chatbot branding.
+Option to host on a custom domain (e.g., chat.reseller.com).
+For white-labeled chatbots embedded on websites, the "Powered by Haxxcel Solutions" footer is removed.
+Reseller management: Admins can manage white-label accounts and their users.
+
+
+Implementation:
+
+Store branding configurations (logo, colors, domain) in Firebase Firestore.
+Use Firebase Hosting to serve white-labeled dashboards on custom domains.
+Implement role-based access in Firebase Authentication for reseller-specific users.
+
+
+
+
+🔐 Master Admin Panel Features
+Purpose: Provide administrators with full control over the platform and user data.
+
+User Management:
+
+Add, edit, delete, or suspend user accounts.
+View user subscription details, payment history, and white-label configurations.
+
+
+Chatbot Management:
+
+View and manage all user-created chatbots.
+Monitor chatbot activity (e.g., conversation volume, API usage, selected models).
+
+
+API and Tool Monitoring:
+
+Track platform-wide API usage (Google, OpenAI, Anthropic, etc.).
+View connected tools, LLM models, voice models, and webhooks per user/chatbot.
+Validate API connections and display available models for each provider.
+
+
+Content Management:
+
+Access all uploaded documents, images, and system prompts.
+Export chat histories (CSV/JSON) for auditing.
+
+
+Billing and Revenue:
+
+Manage subscriptions via Stripe/Paddle dashboard integration.
+Generate revenue reports (daily, monthly, yearly), including white-label plan revenue.
+
+
+System Monitoring:
+
+View access logs, API performance, and system health metrics.
+Monitor voice and LLM model usage, webhook triggers, and analytics data across all users.
+Set usage limits for platform-provided APIs (Google default).
+
+
+
+
+🛠️ Frontend and Backend Implementation
+Purpose: Define how the frontend and backend will work for Haxxcel Chatbot, optimized for Firebase Studio.
+Frontend Implementation
+
+Framework: Built using Firebase Studio’s visual development environment, leveraging React-based components for a dynamic, responsive UI.
+Components:
+User Dashboard: Includes sections for chatbot creation, subscription management, analytics dashboard, and API key configuration. Built with reusable React components (e.g., chatbot list, model selector dropdown).
+Chatbot Builder: Drag-and-drop interface for data inputs (file upload, URL input) and tool integrations, styled with Tailwind CSS for consistency.
+Chat Widget: Custom React-based widget for website embeds, supporting real-time chat, image display, and voice input (using WebRTC for audio capture). The widget includes a footer with a clickable "Powered by Haxxcel Solutions" button (styled as a button with the chatbot’s theme, non-editable, redirecting to https://haxxcelsolutions.com), unless white-labeled (Enterprise plan).
+Admin Panel: Separate interface for admins to manage users, chatbots, and white-label accounts, with role-based access enforced via Firebase Authentication.
+Analytics Dashboard: Interactive charts (Chart.js) for real-time metrics, embedded in the user and admin dashboards.
+White-Label Support: Dynamic theming to apply reseller branding (logo, colors) based on Firestore configurations, removing the "Powered by Haxxcel Solutions" footer for white-labeled chatbots.
+
+
+Workflow:
+Users interact with the dashboard to create chatbots, configure LLMs/voice models, and connect tools.
+Real-time updates (e.g., analytics, conversation history) are powered by Firebase Realtime Database.
+Firebase Studio’s drag-and-drop editor is used to design layouts, with custom code for advanced features (e.g., model selection, webhook configuration).
+
+
+Responsive Design: Optimized for desktop, tablet, and mobile using responsive layouts and Tailwind CSS.
+
+Backend Implementation
+
+Framework: Firebase Functions (Node.js) for serverless backend logic, integrated with Firebase Studio for deployment.
+Components:
+Authentication: Firebase Authentication for user management (email, OAuth, MFA).
+Database: Firebase Firestore for storing user data, chatbot configurations, API keys, webhook settings, white-label branding, and chat history.
+Storage: Firebase Storage for documents, images, and audio files.
+API Integrations:
+LLM APIs: RESTful endpoints to call Google AI API (default), OpenAI, Anthropic, etc., with connection testing logic.
+Voice APIs: Endpoints for Google Cloud Speech-to-Text/Text-to-Speech, Whisper, Deepgram, etc.
+Tool APIs: OAuth and webhook handlers for Google Suite, Shopify, CRMs, and automation platforms.
+
+
+RAG Pipeline: Process uploaded files/images, generate embeddings (via Google Gemini or sentence-transformers), and store in a vector database (e.g., Pinecone, integrated via Firebase Functions).
+Webhooks: Trigger HTTP requests on events using Firebase Functions, with error handling and logging.
+Analytics: Aggregate real-time metrics (conversation volume, API usage) in Firestore, with triggers for dashboard updates.
+Billing: Integrate Stripe/Paddle APIs for subscription and usage-based billing.
+Chat Widget Branding: Ensure the "Powered by Haxxcel Solutions" button is included in the chat widget’s footer (non-white-labeled chatbots), implemented as a React component with an <a> tag linking to https://haxxcelsolutions.com.
+
+
+Workflow:
+Firebase Functions handle API requests (e.g., chatbot creation, model selection, webhook triggers).
+Serverless architecture ensures scalability, with Firebase Hosting serving the frontend.
+API key validation and model listing are performed via Firebase Functions, calling provider APIs (e.g., Google AI API’s model list endpoint).
+Real-time analytics are computed and stored in Firestore, with triggers updating the frontend.
+White-label configurations are applied dynamically based on Firestore data, removing the "Powered by Haxxcel Solutions" footer for Enterprise users.
+
+
+
+Complete Working Overview
+
+User Flow:
+
+Users sign up via Firebase Authentication and select a subscription plan (Starter, Pro, Enterprise).
+In the Firebase Studio-built dashboard, users create a chatbot named Haxxcel Chatbot, upload data (files, URLs, images), and configure a system prompt.
+Users select an LLM provider (default: Google) and input/test an API key. The dashboard displays all available models (e.g., Gemini 2.5 Pro, Gemma 3).
+Users enable voice support, selecting Google Cloud Speech-to-Text (default) or another provider, with connection testing.
+Users connect tools (e.g., Shopify, Google Sheets) via a drag-and-drop interface, with OAuth handled by Firebase Functions.
+Chatbots are deployed to channels (website, WhatsApp, etc.) using embed codes or API keys generated by Firebase. Website embeds include a footer with a "Powered by Haxxcel Solutions" button redirecting to https://haxxcelsolutions.com (except for white-labeled chatbots).
+Real-time analytics (conversation volume, API usage) are displayed in the dashboard, powered by Firestore and Chart.js.
+Webhooks are configured to trigger external systems on events, with logs in the dashboard.
+Enterprise users enable white-label plans, customizing branding via the dashboard, which removes the "Powered by Haxxcel Solutions" footer.
+
+
+Admin Flow:
+
+Admins access the Firebase Studio-built admin panel to manage users, chatbots, and white-label accounts.
+Monitor API usage, webhook triggers, and analytics across all users via Firestore queries.
+Manage subscriptions and revenue through Stripe/Paddle integrations.
+View system logs and performance metrics in the admin panel.
+
+
+Scalability and Performance:
+
+Firebase’s serverless architecture (Functions, Hosting) ensures automatic scaling with user growth.
+Firestore and Realtime Database handle real-time updates for analytics and chat history.
+Firebase Storage scales for file/image uploads, with CDN for fast access.
+Rate-limiting and usage quotas are enforced via Firebase Functions to manage API costs.
+
+
+
+
+📊 Additional Features
+
+Multi-Language Support: Chatbots support multiple languages via Google Translate API or i18n libraries, configurable in the dashboard.
+Future Enhancements:
+Local model hosting for privacy-sensitive users (e.g., LLaMA, Mistral on-premise).
+
+
+
+
+📦 Final Expected Output
+
+Platform: Fully functional Haxxcel Chatbot SaaS platform with user and admin dashboards.
+Codebase: Modular, scalable backend (Firebase Functions) and frontend (React via Firebase Studio).
+API Documentation: OpenAPI/Swagger for backend APIs; user-facing integration guides.
+Deployment: Scripts for deploying on Firebase Hosting; CI/CD setup via GitHub Actions.
+UI/UX: Clean, modern design with responsive layouts (built in Firebase Studio).
+Source Code: Full source code with clear folder structure and documentation.
+Testing: Unit tests for Firebase Functions; integration tests for tool connectors and API connections.
+
+
+📢 Developer Instructions
+
+Modularity: Build reusable React components in Firebase Studio for the frontend; modular Firebase Functions for backend logic.
+Scalability: Leverage Firebase’s serverless architecture for automatic scaling; optimize Firestore queries for performance.
+Security: Encrypt sensitive data (API keys, user credentials) in Firestore; use HTTPS; implement rate-limiting in Firebase Functions.
+UI/UX: Use Firebase Studio’s visual editor for layouts, with Tailwind CSS for styling and responsive design.
+Model Integration:
+Dynamically fetch and display all models from selected providers using their APIs (e.g., Google AI API’s model list endpoint).
+Implement connection testing for each provider’s API key (e.g., small API call to verify access).
+Default to Google AI API for LLMs and voice models; ensure seamless fallback.
+
+
+Analytics and Webhooks:
+Use Firestore for real-time analytics storage and Realtime Database for live updates.
+Implement webhook triggers in Firebase Functions with robust error handling.
+
+
+White-Label and Branding:
+Store branding configurations in Firestore; apply dynamically via Firebase Hosting.
+Ensure the "Powered by Haxxcel Solutions" button is included in the chat widget footer (non-white-labeled chatbots) as a styled <a> tag linking to https://haxxcelsolutions.com.
+
+
+Documentation: Provide inline code comments and a README for setup/deployment.
+Testing: Include unit tests (e.g., Jest for React, Mocha for Firebase Functions) and integration tests for API and voice model connections.
+Error Handling: Implement robust error handling for API failures, invalid API keys, and model-specific issues.
+
+
+✅ Deliverables Checklist
+
+ Scalable backend with Firebase Functions.
+ Responsive frontend with user and admin dashboards (React via Firebase Studio).
+ Vector database integration for RAG (e.g., Pinecone, via Firebase Functions).
+ Authentication system (Firebase Authentication).
+ Payment integration (Stripe/Paddle).
+ Multi-channel deployment (website with "Powered by Haxxcel Solutions" footer, Shopify, WhatsApp, etc.).
+ Voice/image input/output support with Google as default provider.
+ Tool integrations (Google Suite, CRMs, Zapier, etc.).
+ Dynamic LLM/voice model selection with API key testing and model listing.
+ Real-time analytics dashboard with Chart.js.
+ Webhook support for external systems.
+ White-label plan implementation for Enterprise users (removing "Powered by Haxxcel Solutions" footer).
+ API documentation (Swagger/OpenAPI).
+ Deployment scripts and CI/CD pipeline for Firebase.
+ Unit and integration tests.
+ Clean, modern UI/UX with responsive design.
